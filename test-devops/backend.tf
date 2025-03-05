@@ -40,22 +40,22 @@ resource "aws_instance" "k8s_ec2" {
   security_groups = [aws_security_group.k8s_sg.name]
 
   user_data = <<-EOF
-    #!/bin/bash
-    sudo apt update -y
-    sudo apt install -y docker.io
-    sudo systemctl start docker
-    sudo systemctl enable docker
-    sudo usermod -aG docker ubuntu
+      #!/bin/bash
+      sudo apt update -y
+      sudo apt install -y docker.io
+      sudo systemctl start docker
+      sudo systemctl enable docker
+      sudo usermod -aG docker ubuntu
 
-    curl -o kubectl https://s3.us-west-2.amazonaws.com/amazon-eks/1.21.2/2021-07-05/bin/linux/amd64/kubectl
-    chmod +x ./kubectl
-    sudo mv ./kubectl /usr/local/bin/
+      curl -o kubectl https://s3.us-west-2.amazonaws.com/amazon-eks/1.21.2/2021-07-05/bin/linux/amd64/kubectl
+      chmod +x ./kubectl
+      sudo mv ./kubectl /usr/local/bin/
 
-    curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
-    chmod +x minikube
-    sudo mv minikube /usr/local/bin/
+      curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+      chmod +x minikube
+      sudo mv minikube /usr/local/bin/
 
-    minikube start --driver=docker
+      minikube start --driver=docker
   EOF
 
   tags = {
@@ -63,9 +63,9 @@ resource "aws_instance" "k8s_ec2" {
   }
 }
 
-resource "aws_security_group" "security_group_name" {
+resource "aws_security_group" "k8s_sg" {
   name        = "k8s-security-group"
-  description = "Allow SSH and Kubernetes traffic"
+  description = "libera as portas ssg e do k8s"
 
   ingress {
     from_port   = 22
@@ -75,7 +75,7 @@ resource "aws_security_group" "security_group_name" {
   }
 
   ingress {
-    from_port   = 6443 # Pode ser acessado pelo Kubernetes
+    from_port   = 6443
     to_port     = 6443
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
@@ -93,5 +93,5 @@ resource "aws_security_group" "security_group_name" {
     to_port     = 443
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
-  }
+  }  
 }
