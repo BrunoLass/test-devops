@@ -34,7 +34,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "lifecycle" {
 
 resource "aws_instance" "k8s_ec2" {
   ami = "ami-04b4f1a9cf54c11d0" 
-  instance_type = "t3.micro"
+  instance_type = "t3.medium"
   key_name      = "minha-chave-ssh"
 
   security_groups = [aws_security_group.k8s_sg.name]
@@ -54,6 +54,10 @@ resource "aws_instance" "k8s_ec2" {
       curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
       chmod +x minikube
       sudo mv minikube /usr/local/bin/
+
+      curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+      chmod 700 get_helm.sh
+      ./get_helm.sh
 
       minikube start --driver=docker
   EOF

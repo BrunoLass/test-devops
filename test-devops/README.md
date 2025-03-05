@@ -41,6 +41,8 @@ terraform apply
 ```
 minikube start
 
+cd /test-devops
+
 helm install test-devops ./test-devops
 ```
 
