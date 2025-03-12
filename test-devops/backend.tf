@@ -35,11 +35,25 @@ resource "aws_s3_bucket_lifecycle_configuration" "lifecycle" {
     }
   }
 }
+resource "tls_private_key" "ssh_key" {
+  algorithm = "RSA"
+  rsa_bits  = 4096
+}
+
+resource "aws_key_pair" "ssh_key" {
+  key_name   = "minha-chave-ssh"
+  public_key = tls_private_key.ssh_key.public_key_openssh
+}
+
+output "private_key_pem" {
+  value     = tls_private_key.ssh_key.private_key_pem
+  sensitive = true
+}
 
 resource "aws_instance" "k8s_ec2" {
-  ami = "ami-04b4f1a9cf54c11d0"  
+  ami           = "ami-04b4f1a9cf54c11d0"
   instance_type = "t3.medium"
-  key_name      = "minha-chave-ssh"
+  key_name      = aws_key_pair.ssh_key.key_name 
 
   security_groups = [aws_security_group.k8s_sg.name]
 
@@ -66,8 +80,6 @@ resource "aws_instance" "k8s_ec2" {
       # Instalar Helm
       curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 
-      # Iniciar Minikube
-      minikube start --driver=docker
   EOF
 
   tags = {
