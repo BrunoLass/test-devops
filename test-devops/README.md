@@ -26,7 +26,28 @@ Um bucket S3 para armazenar o estado do Terraform com versionamento e configura�
 Uma instância EC2 no AWS para executar o Minikube, com configurações para instalar Docker, Minikube e kubectl automaticamente durante a inicialização da instância.
 Um grupo de segurança que permite acesso SSH à instância EC2 e permite tráfego no Kubernetes (porta 6443), além de permitir tráfego HTTP e HTTPS de saída.
 
+### Para iniciar o Provisionamento:
+
+- Abra o AWS Console
+- Entre em EC2, Instance
+- Na barra lateral esquerda, terá uma opção `Network & Security`, clique em `Key Pairs`
+- Crie uma nova Key Pair chamada `minha-chave-ssh` em `Create key pair`, estará no canto superior direito.
+- Basta adicionar o nome `minha-chave-ssh`, mantendo as configurações padrão e no canto inferior direito `Create key pair`
+- Após fazer o download, dê permissão para que só você possa ver a chave, rodando `chmod 400 <path-para-sua-chave>minha-chave-ssh.pem`
+> Essa chave é necessária para manter a segurança da Instancia EC2.
++ Rode o comando: `ssh -i <path-para-sua-chave>/minha-chave-ssh.pem ec2-user@<ec2_public_ip>
+- Essa `ec2_public_ip` estará visível no terminal após a finalização do `terraform apply`, mas caso haja algum problema, basta: 
+ - No Console AWS, clique em `Instances`
+ - Depois clique no `instance ID` 
+ - Você terá a opção de copiar o `ec2_public_ip` que estará no canto superior esquerdo.
+
 ### Para iniciar o ambiente:
+
+### Criação bucket
+
+- precisamos criar um bucket antes do nosso terraform, pois como usamos o tf.state no codigo, não podemos criar um bucket e configurar o tf.state juntos
+- rode o comando
+`aws s3api create-bucket --bucket bruno-lassakoski-bucket-325 --region us-east-1`
 
 - **Terraform:**
 
