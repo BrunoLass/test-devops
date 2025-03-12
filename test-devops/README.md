@@ -35,7 +35,7 @@ Um grupo de segurança que permite acesso SSH à instância EC2 e permite tráfe
  `unzip awscliv2.zip`
  `sudo ./aws/install`
  - Após instalar o AWS CLI, você precisa configurar suas credenciais para acessar a AWS.
- - rode o comando `aws configure`
+ - Rode o comando: `aws configure`
  - Vá ate onde esta seu login, clique em cima do seu login e depois clique em Credenciais de segurança>Chaves de acesso> Criar chave de acesso
  - Guarde sua chave de acesso e a Chave de acesso secreta
  - Digite suas credenciais quando solicitado:
@@ -48,8 +48,8 @@ Um grupo de segurança que permite acesso SSH à instância EC2 e permite tráfe
 
 ### Criação bucket
 
-- precisamos criar um bucket antes do nosso terraform, pois como usamos o tf.state no codigo, não podemos criar um bucket e configurar o tf.state juntos
-- rode o comando
+- Precisamos criar um bucket antes do nosso terraform, pois como usamos o tf.state no codigo, não podemos criar um bucket e configurar o tf.state juntos
+- Rode o comando:
 `aws s3api create-bucket --bucket bruno-lassakoski-bucket-325 --region us-east-1`
 
 - **Terraform:**
@@ -93,4 +93,4 @@ minikube kubectl -- get pods
 ```
 > Se quiser ver as configurações do pod, basta rodar `minikube kubectl describe pod test-devops<nome-completo-do-pod>`
 
-> Caso esteja usando um cluster do Kubernetes, é só rodar o `kubernetes get <workload>` e `kubectl describe pod <nome-do-pod>`.
+> Caso esteja usando um cluster do Kubernetes, é só rodar o `kubectl get pod` e `kubectl describe pod <nome-do-pod>`.
