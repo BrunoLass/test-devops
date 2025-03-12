@@ -2,15 +2,25 @@ provider "aws" {
   region = "us-east-1"
 }
 
+terraform {
+  backend "s3" {
+    bucket         = "bruno-lassakoski-bucket-325"
+    key            = "terraform/state.tfstate"
+    region         = "us-east-1"
+    encrypt        = true
+    use_lockfile   = true
+  }
+}
+
 resource "aws_s3_bucket_versioning" "versioning" {
-  bucket = "bruno-lassakoski-bucket"
+  bucket = "bruno-lassakoski-bucket-325"
   versioning_configuration {
     status = "Enabled"
   }
 }
 
 resource "aws_s3_bucket_lifecycle_configuration" "lifecycle" {
-  bucket = "bruno-lassakoski-bucket"
+  bucket = "bruno-lassakoski-bucket-325"
 
   rule {
     id     = "expire-old-versions"
