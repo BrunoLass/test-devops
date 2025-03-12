@@ -2,23 +2,23 @@ provider "aws" {
   region = "us-east-1"
 }
 
-resource "aws_s3_bucket" "terraform_state" {
-  bucket = "meu-terraform-bucket-BL"
-}
-
 resource "aws_s3_bucket_versioning" "versioning" {
-  bucket = aws_s3_bucket.terraform_state.id
+  bucket = "bruno-lassakoski-bucket"
   versioning_configuration {
     status = "Enabled"
   }
 }
 
 resource "aws_s3_bucket_lifecycle_configuration" "lifecycle" {
-  bucket = aws_s3_bucket.terraform_state.id
+  bucket = "bruno-lassakoski-bucket"
 
   rule {
     id     = "expire-old-versions"
     status = "Enabled"
+
+    filter {
+      prefix = ""  # Aplica a todos os objetos no bucket
+    }
 
     noncurrent_version_expiration {
       noncurrent_days = 30  # Exclui versões antigas após 30 dias
@@ -26,80 +26,8 @@ resource "aws_s3_bucket_lifecycle_configuration" "lifecycle" {
   }
 }
 
-resource "aws_iam_user" "terraform_user" {
-  name = "terraform-backend-user"
-}
-
-resource "aws_iam_access_key" "terraform_key" {
-  user = aws_iam_user.terraform_user.name
-}
-
-resource "aws_iam_policy" "terraform_s3_policy" {
-  name        = "TerraformS3Policy"
-  description = "Permite que o Terraform acesse o S3 para armazenar o state"
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect   = "Allow"
-        Action   = [
-          "s3:PutObject",
-          "s3:GetObject",
-          "s3:ListBucket",
-          "s3:DeleteObject"
-        ]
-        Resource = [
-          "arn:aws:s3:::${aws_s3_bucket.terraform_state.id}",
-          "arn:aws:s3:::${aws_s3_bucket.terraform_state.id}/*"
-        ]
-      }
-    ]
-  })
-}
-
-resource "aws_iam_user_policy_attachment" "terraform_user_policy_attachment" {
-  user       = aws_iam_user.terraform_user.name
-  policy_arn = aws_iam_policy.terraform_s3_policy.arn
-}
-
-output "aws_access_key_id" {
-  value     = aws_iam_access_key.terraform_key.id
-  sensitive = true
-}
-
-output "aws_secret_access_key" {
-  value     = aws_iam_access_key.terraform_key.secret
-  sensitive = true
-}
-
-terraform {
-  backend "s3" {
-    bucket        = "meu-terraform-bucket-BL"
-    key           = "terraform/state.tfstate"
-    region        = "us-east-1"
-    encrypt       = true
-    use_lockfile  = true
-  }
-}
-
-resource "tls_private_key" "my_key" {
-  algorithm = "RSA"
-  rsa_bits  = 4096
-}
-
-resource "aws_key_pair" "my_key_pair" {
-  key_name   = "minha-chave-ssh"
-  public_key = tls_private_key.my_key.public_key_openssh
-}
-
-output "private_key_pem" {
-  value     = tls_private_key.my_key.private_key_pem
-  sensitive = true
-}
-
 resource "aws_instance" "k8s_ec2" {
-  ami = "ami-04b4f1a9cf54c11d0" 
+  ami = "ami-04b4f1a9cf54c11d0"  
   instance_type = "t3.medium"
   key_name      = "minha-chave-ssh"
 
@@ -108,23 +36,27 @@ resource "aws_instance" "k8s_ec2" {
   user_data = <<-EOF
       #!/bin/bash
       sudo apt update -y
-      sudo apt install -y docker.io
+      sudo apt install -y docker.io curl jq
+
       sudo systemctl start docker
       sudo systemctl enable docker
       sudo usermod -aG docker ubuntu
 
-      curl -o kubectl https://s3.us-west-2.amazonaws.com/amazon-eks/1.21.2/2021-07-05/bin/linux/amd64/kubectl
-      chmod +x ./kubectl
-      sudo mv ./kubectl /usr/local/bin/
-
+      # Instalar Minikube
       curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
       chmod +x minikube
       sudo mv minikube /usr/local/bin/
 
-      curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
-      chmod 700 get_helm.sh
-      ./get_helm.sh
+      # Instalar kubectl
+      curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+      echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee -a /etc/apt/sources.list.d/kubernetes.list
+      sudo apt update
+      sudo apt install -y kubectl
 
+      # Instalar Helm
+      curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+
+      # Iniciar Minikube
       minikube start --driver=docker
   EOF
 
