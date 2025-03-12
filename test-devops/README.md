@@ -10,7 +10,7 @@
 ### Passo a Passo:
 
 - Clone o repositório
-> Rode o comando: `git clone `
+> Rode o comando: `git clone https://github.com/BrunoLass/test-devops `
 
 ### Estrutura de arquivos:
 
@@ -24,24 +24,27 @@
 
 Um bucket S3 para armazenar o estado do Terraform com versionamento e configuração de ciclo de vida para excluir versões antigas após 30 dias.
 Uma instância EC2 no AWS para executar o Minikube, com configurações para instalar Docker, Minikube e kubectl automaticamente durante a inicialização da instância.
-Um grupo de segurança que permite acesso SSH à instância EC2 e permite tráfego no Kubernetes (porta 6443), além de permitir tráfego HTTP e HTTPS de saída.
+Um grupo de segurança que permite acesso SSH à instância EC2 e permite tráfego no Kubernetes (porta 6443), além de permitir tráfego de saída.
 
 ### Para iniciar o Provisionamento:
 
-- Abra o AWS Console
-- Entre em EC2, Instance
-- Na barra lateral esquerda, terá uma opção `Network & Security`, clique em `Key Pairs`
-- Crie uma nova Key Pair chamada `minha-chave-ssh` em `Create key pair`, estará no canto superior direito.
-- Basta adicionar o nome `minha-chave-ssh`, mantendo as configurações padrão e no canto inferior direito `Create key pair`
-- Após fazer o download, dê permissão para que só você possa ver a chave, rodando `chmod 400 <path-para-sua-chave>minha-chave-ssh.pem`
-> Essa chave é necessária para manter a segurança da Instancia EC2.
-+ Rode o comando: `ssh -i <path-para-sua-chave>/minha-chave-ssh.pem ec2-user@<ec2_public_ip>
-- Essa `ec2_public_ip` estará visível no terminal após a finalização do `terraform apply`, mas caso haja algum problema, basta: 
- - No Console AWS, clique em `Instances`
- - Depois clique no `instance ID` 
- - Você terá a opção de copiar o `ec2_public_ip` que estará no canto superior esquerdo.
+### Conectar no aws cli
 
-### Para iniciar o ambiente:
+ - Baixe e instale o AWS CLI
+ `curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"`
+ `unzip awscliv2.zip`
+ `sudo ./aws/install`
+ - Após instalar o AWS CLI, você precisa configurar suas credenciais para acessar a AWS.
+ - rode o comando `aws configure`
+ - Vá ate onde esta seu login, clique em cima do seu login e depois clique em Credenciais de segurança>Chaves de acesso> Criar chave de acesso
+ - Guarde sua chave de acesso e a Chave de acesso secreta
+ - Digite suas credenciais quando solicitado:
+    AWS Access Key ID [None]: chave de acesso
+    AWS Secret Access Key [None]: Chave de acesso secreta
+    Default region name [None]: us-east-1  # Ou outra região da AWS
+    Default output format [None]: json     # Pode ser json, table ou text
+
+ 
 
 ### Criação bucket
 
@@ -55,12 +58,26 @@ Um grupo de segurança que permite acesso SSH à instância EC2 e permite tráfe
 terraform init
 terraform plan
 terraform apply
+terraform output -raw private_key_pem > minha-chave-ssh.pem
+chmod 400 minha-chave-ssh.pem
+
 ```
+### Conectar na instancia
+
+ - Rode o comando: `ssh -i <path-para-sua-chave>/minha-chave-ssh.pem ec2-user@<ec2_public_ip>
+ - Essa `ec2_public_ip` estará visível no terminal após a finalização do `terraform apply`, mas caso haja algum problema, basta: 
+ - No Console AWS, clique em `Instances`
+ - Depois clique no `instance ID` 
+ - Você terá a opção de copiar o `ec2_public_ip` que estará no canto superior esquerdo.
+
 
 - **Minikube:**
 
 ```
 minikube start
+
+ Clone o repositório
+ Rode o comando: `git clone https://github.com/BrunoLass/test-devops `
 
 cd /test-devops
 
